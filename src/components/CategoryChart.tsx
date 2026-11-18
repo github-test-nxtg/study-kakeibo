@@ -13,6 +13,7 @@ interface Props {
 const R = 54;
 const STROKE = 20;
 const C = 2 * Math.PI * R;
+const LEGEND_LIMIT = 5;
 
 /** 外部ライブラリを使わない SVG ドーナツグラフ（Electron でもそのまま動く） */
 export function CategoryChart({ data, type, onTypeChange, selectedId, onSelect }: Props) {
@@ -29,6 +30,9 @@ export function CategoryChart({ data, type, onTypeChange, selectedId, onSelect }
     return seg;
   });
 
+  const topItems = data.slice(0, LEGEND_LIMIT);
+  const otherItems = data.slice(LEGEND_LIMIT);
+  const otherTotal = otherItems.reduce((s, d) => s + d.amount, 0);
   return (
     <section className="panel" aria-labelledby="category-chart-title">
       <div className="panel__head">
@@ -80,7 +84,7 @@ export function CategoryChart({ data, type, onTypeChange, selectedId, onSelect }
           </svg>
 
           <ul className="legend">
-            {data.map((d) => (
+            {topItems.map((d) => (
               <li key={d.category.id}>
                 <button
                   className="legend__item"
@@ -97,6 +101,7 @@ export function CategoryChart({ data, type, onTypeChange, selectedId, onSelect }
                 </button>
               </li>
             ))}
+            {otherItems.length > 0 && <li className="legend__more">他 {otherItems.length} 件 ({formatYen(otherTotal)})</li>}
           </ul>
         </div>
       )}
