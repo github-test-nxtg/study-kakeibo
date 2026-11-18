@@ -32,6 +32,7 @@ export function MonthSummary({ summary, previous }: Props) {
           </div>
         )}
       </dl>
+      {summary.balance < 0 && <p className="amount--expense">今月は赤字です</p>}
       <p className="summary__note">
         {summary.count}件の記録
         {diff !== null && (
