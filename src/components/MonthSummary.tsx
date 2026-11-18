@@ -9,6 +9,7 @@ interface Props {
 /** 月の収支。帳簿の締め方にならって、収支の下に二重線を引く */
 export function MonthSummary({ summary, previous }: Props) {
   const diff = previous.expense > 0 ? (summary.expense - previous.expense) / previous.expense : null;
+  const savingsRate = summary.income > 0 ? summary.balance / summary.income * 100 : null;
   return (
     <section className="summary" aria-label="今月の収支">
       <dl className="summary__rows">
@@ -24,6 +25,12 @@ export function MonthSummary({ summary, previous }: Props) {
           <dt>収支</dt>
           <dd className={`amount ${summary.balance < 0 ? 'amount--expense' : ''}`}>{formatSignedYen(summary.balance)}</dd>
         </div>
+        {savingsRate !== null && (
+          <div className="summary__row">
+            <dt>貯蓄率</dt>
+            <dd className={`amount ${savingsRate < 0 ? 'amount--expense' : ''}`}>{savingsRate.toFixed(0)}%</dd>
+          </div>
+        )}
       </dl>
       <p className="summary__note">
         {summary.count}件の記録
