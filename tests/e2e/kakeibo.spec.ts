@@ -146,3 +146,9 @@ test('並び順を何度切り替えても、明細が重複しない', async ({
   await expect(toggle).toHaveText('金額順にする');
   expect(await names()).toEqual(initial);       // 偶数回押したら元の並びに戻る
 });
+
+test('タブ名に表示中の月が出る', async ({ page }) => {
+  await expect(page).toHaveTitle('家計簿 - 2026年11月');
+  await page.getByRole('button', { name: '前の月' }).click();
+  await expect(page).toHaveTitle('家計簿 - 2026年10月');
+});

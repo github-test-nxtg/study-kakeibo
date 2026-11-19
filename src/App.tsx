@@ -14,6 +14,7 @@ import { LedgerToolbar, type TypeFilter } from './components/LedgerToolbar';
 import { TransactionList } from './components/TransactionList';
 import { TransactionForm } from './components/TransactionForm';
 import { Toast, type ToastState } from './components/Toast';
+import { formatMonth } from './utils/format';
 
 interface Props {
   /** 保存先は外から注入する。Electron 版ではここに IPC 経由の実装を渡すだけ */
@@ -61,6 +62,12 @@ export function App({ repository }: Props) {
     () => visible.reduce((s, t) => s + (t.type === 'income' ? t.amount : -t.amount), 0),
     [visible],
   );
+
+  useEffect(() => {
+    const ym = formatMonth(month);
+    const title = (`家計簿 - ${ym.year}年${ym.month}月`);
+    document.title = title;
+  },[month]);
 
   // ---- キーボードショートカット（デスクトップアプリを意識） ----
   useEffect(() => {
