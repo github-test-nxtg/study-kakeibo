@@ -63,6 +63,18 @@ export function App({ repository }: Props) {
     [visible],
   );
 
+  // メモ入力の候補：同じカテゴリでよく使うメモ上位8件
+  const memoSuggestions = useCallback(
+    (categoryId: string) => {
+      const counts = new Map<string, number>();
+      for (const t of tx.items) {
+        if (t.categoryId === categoryId && t.memo) counts.set(t.memo, (counts.get(t.memo) ?? 0) + 1);
+      }
+      return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8).map(([m]) => m);
+    },
+    [tx.items],
+  );
+
   useEffect(() => {
     const ym = formatMonth(month);
     const title = (`家計簿 - ${ym.year}年${ym.month}月`);
@@ -202,6 +214,7 @@ export function App({ repository }: Props) {
           initial={editing.mode === 'edit' ? editing.item : null}
           defaultDate={defaultDate}
           categories={categories}
+          memoSuggestions={memoSuggestions}
           onSubmit={handleSubmit}
           onDelete={editing.mode === 'edit' ? () => handleDelete(editing.item) : undefined}
           onClose={() => setEditing(null)}
