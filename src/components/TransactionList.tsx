@@ -27,7 +27,7 @@ export function TransactionList({ items, lookup, showYear, onEdit, emptyMessage,
         const label = formatDateLabel(g.date);
         const net = g.items.reduce((s, t) => s + (t.type === 'income' ? t.amount : -t.amount), 0);
         return (
-          <li key={g.date} className="ledger__day">
+          <li key={g.items[0].id} className="ledger__day">
             <div className="ledger__date">
               <span>
                 {showYear && <span className="ledger__year">{g.date.slice(0, 4)}年</span>}

@@ -130,3 +130,19 @@ test('前の月に移動すると表示が切り替わる', async ({ page }) => 
   await expect(page.getByRole('heading', { level: 1 })).toContainText('10月');
   await expect(page.getByText('10月の明細')).toBeVisible();
 });
+
+test('並び順を何度切り替えても、明細が重複しない', async ({ page }) => {
+  const names = () =>
+    page.locator('.entry').evaluateAll((els) => els.map((e) => e.getAttribute('aria-label')));
+  const initial = await names();
+  const toggle = page.getByRole('button', { name: /順にする/ });
+
+  for (let i = 0; i < 4; i++) {
+    await toggle.click();
+    const now = await names();
+    expect(new Set(now).size).toBe(now.length); // 同じ行が二重に出ていない
+    expect(now.length).toBe(initial.length);    // 件数が変わっていない
+  }
+  await expect(toggle).toHaveText('金額順にする');
+  expect(await names()).toEqual(initial);       // 偶数回押したら元の並びに戻る
+});

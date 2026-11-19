@@ -33,6 +33,7 @@ export function App({ repository }: Props) {
   const [keyword, setKeyword] = useState('');
   const [allPeriods, setAllPeriods] = useState(false);
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
+  const [sortOrder, setSortOrder] = useState<'date' | 'amount'>('date');
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [chartType, setChartType] = useState<TransactionType>('expense');
   const [editing, setEditing] = useState<Editing>(null);
@@ -52,24 +53,13 @@ export function App({ repository }: Props) {
     let list = allPeriods ? tx.items : filterByMonth(tx.items, month);
     if (typeFilter !== 'all') list = list.filter((t) => t.type === typeFilter);
     if (categoryFilter) list = list.filter((t) => t.categoryId === categoryFilter);
-    return sortByDateDesc(searchTransactions(list, keyword, lookup));
-  }, [tx.items, allPeriods, month, typeFilter, categoryFilter, keyword, lookup]);
+    const dataDateDesc = sortByDateDesc(searchTransactions(list, keyword, lookup));
+    return (sortOrder === 'date' ? dataDateDesc : dataDateDesc.sort((a, b) => b.amount - a.amount));
+  }, [tx.items, allPeriods, month, typeFilter, sortOrder, categoryFilter, keyword, lookup]);
 
   const visibleTotal = useMemo(
     () => visible.reduce((s, t) => s + (t.type === 'income' ? t.amount : -t.amount), 0),
     [visible],
-  );
-
-  // メモ入力の候補：同じカテゴリでよく使うメモ上位8件
-  const memoSuggestions = useCallback(
-    (categoryId: string) => {
-      const counts = new Map<string, number>();
-      for (const t of tx.items) {
-        if (t.categoryId === categoryId && t.memo) counts.set(t.memo, (counts.get(t.memo) ?? 0) + 1);
-      }
-      return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8).map(([m]) => m);
-    },
-    [tx.items],
   );
 
   // ---- キーボードショートカット（デスクトップアプリを意識） ----
@@ -178,6 +168,10 @@ export function App({ repository }: Props) {
             {(searching || typeFilter !== 'all' || categoryFilter) && visible.length > 0 && (
               <>　合計 <strong>{visibleTotal >= 0 ? '+' : '−'}{Math.abs(visibleTotal).toLocaleString('ja-JP')}円</strong></>
             )}
+            <button
+              className="text-btn"
+              onClick={() => setSortOrder(sortOrder === 'date' ? 'amount' : 'date')}>{sortOrder === 'date' ? '金額順にする' : '日付順にする'}
+            </button>
           </p>
           <TransactionList
             items={visible}
@@ -201,7 +195,6 @@ export function App({ repository }: Props) {
           initial={editing.mode === 'edit' ? editing.item : null}
           defaultDate={defaultDate}
           categories={categories}
-          memoSuggestions={memoSuggestions}
           onSubmit={handleSubmit}
           onDelete={editing.mode === 'edit' ? () => handleDelete(editing.item) : undefined}
           onClose={() => setEditing(null)}
